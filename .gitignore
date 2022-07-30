@@ -4,3 +4,4 @@ dist
 .yarnrc.yml
 .DS_STORE
 coverage/
+.data/
