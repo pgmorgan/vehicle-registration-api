@@ -1,26 +1,27 @@
 version: "3.6"
 
 services:
-  mysql:
-    platform: linux/x86_64
-    image: mysql:8
-    cap_add:
-      - SYS_NICE
+  vehicle_registration_api:
+    depends_on:
+      - mongo
     volumes:
-      - db_data:/var/lib/mysql
-      - db_log:/var/log/mysql
-    restart: always
-    env_file: .env
-    environment:
-      MYSQL_ROOT_PASSWORD: ${TYPEORM_PASSWORD}
-      MYSQL_DATABASE: ${TYPEORM_DATABASE}
-      MYSQL_USER: ${TYPEORM_USERNAME}
-      MYSQL_PASSWORD: ${TYPEORM_PASSWORD}
+      - .:/app
+      - /app/node_modules
+    build:
+      context: .
+      dockerfile: Dockerfile.local
     ports:
-      - ${TYPEORM_PORT}:${TYPEORM_PORT}
-
-volumes:
-  db_data:
-    driver: local
-  db_log:
-    driver: local
+      - 8080:8080
+    env_file: .env
+  mongo:
+    image: mongo:4
+    restart: always
+    volumes:
+      - .data/mongo:/data/db
+    env_file: .env
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+    # mongo logs clutter stdout in my opinion.
+    # Comment out the logging section here to re-enable logs.
+    logging:
+      driver: none
