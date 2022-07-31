@@ -2,7 +2,7 @@ import http, { Server } from "http";
 import cors from "cors";
 import express, { Express } from "express";
 import morgan from "morgan";
-// import swaggerUi from "swagger-ui-express";
+import swaggerUI from "swagger-ui-express";
 import winston from "winston";
 
 import internalServerError from "../lib/middleware/internalServerError";
@@ -10,22 +10,21 @@ import logInternalServerError from "../lib/middleware/logInternalServerError";
 import notFound from "../lib/middleware/notFound";
 import * as tsoaRoutes from "./tsoaRoutes";
 
-export default function configureExpress(bullboard?: BullBoardExpress): {
+export default function configureExpress(): {
   expressApp: Express;
   httpServer: Server;
 } {
   const expressApp = express();
   const httpServer = http.createServer(expressApp);
 
-  expressApp.use(express.json({ limit: "50mb" }));
-  expressApp.use(express.urlencoded({ extended: true }));
+  /* Returns middleware that only parses urlencoded bodies and
+   * only looks at requests where the Content-Type header matches the type option */
+  expressApp.use(express.urlencoded());
 
-  /* istanbul ignore next */
   if (process.env.NODE_ENV === "development") {
     expressApp.use(cors());
   }
 
-  /* istanbul ignore next */
   if (process.env.LOG_REQUESTS === "true") {
     expressApp.use(
       morgan("combined", {
@@ -45,7 +44,7 @@ export default function configureExpress(bullboard?: BullBoardExpress): {
         url: "/api-docs/openapi.json",
       },
     };
-    expressApp.use("/api-docs", swaggerUi.serve, swaggerUi.setup(undefined, swaggerOptions));
+    expressApp.use("/api-docs", swaggerUI.serve, swaggerUI.setup(undefined, swaggerOptions));
   }
 
   tsoaRoutes.RegisterRoutes(expressApp);
