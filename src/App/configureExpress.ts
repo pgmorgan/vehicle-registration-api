@@ -13,6 +13,7 @@ import notFound from "../lib/middleware/notFound";
 export default function configureExpress(): {
   expressApp: Express;
   httpServer: Server;
+  // eslint-disable-next-line indent
 } {
   const expressApp = express();
   const httpServer = http.createServer(expressApp);

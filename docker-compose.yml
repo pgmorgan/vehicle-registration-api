@@ -1,23 +1,24 @@
 version: "3.6"
 
 services:
-  node_server:
-    depends_on:
-      - mongo
-    volumes:
-      - .:/app
-      - /app/node_modules
-    build:
-      context: .
-      dockerfile: Dockerfile.local
-    ports:
-      - 8080:8080
-    env_file: .env
-    extra_hosts:
-      - "mongo:127.0.0.1"
+#  node_server:
+#    depends_on:
+#      - mongo
+#    volumes:
+#      - .:/app
+#      - /app/node_modules
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.local
+#    ports:
+#      - 8080:8080
+#    env_file: .env
+#    extra_hosts:
+#      - "mongo:127.0.0.1"
   mongo:
     image: mongo:4
-    command: mongod --quiet --logpath /dev/null
+    # Uncomment the following command to turn off chatty mongo logs
+    # command: mongod --quiet --logpath /dev/null
     restart: always
     volumes:
       - .data/mongo:/data/db
