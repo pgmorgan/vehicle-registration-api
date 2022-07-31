@@ -6,7 +6,7 @@
   "author": "Peter Morgan <petergm@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node ./dist/index.js ",
+    "start": "npm run build && node -r dotenv/config ./dist/index.js ",
     "dev": "nodemon -r dotenv/config src/index.ts",
     "build": "tsc",
     "lint": "eslint src/**/*.ts",

@@ -6,14 +6,16 @@ const retryAttempts = 10;
 /**
  * Attempts Mongo Connection
  */
-export async function dbConnect(): Promise<void> {
+export async function configureMongoose(): Promise<void> {
   winston.info("Creating new Mongo connection.");
   await dbConnectWithRetries(retryAttempts);
 }
 
 async function dbConnectWithRetries(counter: number): Promise<void> {
   try {
-    await mongoose.connect(String(process.env.MONGO_CONNECTION_STRING));
+    const { MONGO_HOST, MONGO_PORT, MONGO_DATABASE } = process.env;
+    const connectionString = `mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`;
+    await mongoose.connect(connectionString);
     winston.info("Successfully connected to MongoDB.");
   } catch (err) {
     if (counter <= 0) {
