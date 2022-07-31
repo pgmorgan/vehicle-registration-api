@@ -2,13 +2,13 @@ import http, { Server } from "http";
 import cors from "cors";
 import express, { Express } from "express";
 import morgan from "morgan";
-import swaggerUI from "swagger-ui-express";
+// import swaggerUI from "swagger-ui-express";
 import winston from "winston";
 
 import internalServerError from "../lib/middleware/internalServerError";
 import logInternalServerError from "../lib/middleware/logInternalServerError";
 import notFound from "../lib/middleware/notFound";
-import * as tsoaRoutes from "./tsoaRoutes";
+// import * as tsoaRoutes from "./tsoaRoutes";
 
 export default function configureExpress(): {
   expressApp: Express;
@@ -19,7 +19,7 @@ export default function configureExpress(): {
 
   /* Returns middleware that only parses urlencoded bodies and
    * only looks at requests where the Content-Type header matches the type option */
-  expressApp.use(express.urlencoded());
+  expressApp.use(express.urlencoded({ extended: true }));
 
   if (process.env.NODE_ENV === "development") {
     expressApp.use(cors());
@@ -37,17 +37,17 @@ export default function configureExpress(): {
 
   if (process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const swaggerJson = require("../../build/public/swagger.json");
-    expressApp.get("/api-docs/openapi.json", (_req, res) => res.send(swaggerJson));
-    const swaggerOptions = {
-      swaggerOptions: {
-        url: "/api-docs/openapi.json",
-      },
-    };
-    expressApp.use("/api-docs", swaggerUI.serve, swaggerUI.setup(undefined, swaggerOptions));
+    // const swaggerJson = require("../../build/public/swagger.json");
+    // expressApp.get("/api-docs/openapi.json", (_req, res) => res.send(swaggerJson));
+    // const swaggerOptions = {
+    //   swaggerOptions: {
+    //     url: "/api-docs/openapi.json",
+    //   },
+    // };
+    // expressApp.use("/api-docs", swaggerUI.serve, swaggerUI.setup(undefined, swaggerOptions));
   }
 
-  tsoaRoutes.RegisterRoutes(expressApp);
+  // tsoaRoutes.RegisterRoutes(expressApp);
 
   expressApp.use(notFound);
   expressApp.use(logInternalServerError, internalServerError);
