@@ -1,1 +1,0 @@
-export { ExampleEntity } from "./example-entity/example-entity";
