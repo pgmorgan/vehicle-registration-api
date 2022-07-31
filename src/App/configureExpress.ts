@@ -8,7 +8,7 @@ import winston from "winston";
 import internalServerError from "../lib/middleware/internalServerError";
 import logInternalServerError from "../lib/middleware/logInternalServerError";
 import notFound from "../lib/middleware/notFound";
-// import * as tsoaRoutes from "./tsoaRoutes";
+import * as tsoaRoutes from "./tsoaRoutes";
 
 export default function configureExpress(): {
   expressApp: Express;
@@ -48,7 +48,7 @@ export default function configureExpress(): {
     // expressApp.use("/api-docs", swaggerUI.serve, swaggerUI.setup(undefined, swaggerOptions));
   }
 
-  // tsoaRoutes.RegisterRoutes(expressApp);
+  tsoaRoutes.RegisterRoutes(expressApp);
 
   expressApp.use(notFound);
   expressApp.use(logInternalServerError, internalServerError);

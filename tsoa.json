@@ -1,0 +1,23 @@
+{
+  "basePath": "/",
+  "controllerPathGlobs": ["./src/controllers/**/*Controller.ts"],
+  "entryFile": "./src/index.ts",
+  "noImplicitAdditionalProperties": "silently-remove-extras",
+  "spec": {
+    "outputDirectory": "./build/public",
+    "specVersion": 3,
+    "schemes": ["http"],
+    "securityDefinitions": {
+      "access_token": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "routes": {
+    "iocModule": "./src/lib/tsyringeTsoaIocContainer.ts",
+    "routesDir": "./src/App",
+    "routesFileName": "tsoaRoutes.ts",
+    "middleware": "express"
+  }
+}

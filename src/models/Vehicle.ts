@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import { stdColors, USAStates } from "../lib";
 
-export interface VehicleDocument extends mongoose.Document {
+export interface IVehicle {
+  id: string;
   licensePlate: string;
   registrationNumber: number;
   registrationState: USAStates;
@@ -16,26 +17,30 @@ export interface VehicleDocument extends mongoose.Document {
   updatedAt: Date;
 }
 
+export interface IVehicleDocument extends Omit<IVehicle, "id">, mongoose.Document {}
+
 const VehicleSchema = new mongoose.Schema(
   {
     /*  Mongo generates its own `_id` field per document, so I do not need
      *  to manually create one. */
-    licensePlate: {
-      type: String,
-      required: true,
-    },
-    registrationNumber: {
-      type: Number,
-      required: true,
-    },
-    registrationState: {
-      type: String,
-      enum: USAStates,
-      required: true,
-    },
-    nameOnRegistration: {
-      type: String,
-      required: true,
+    registration: {
+      licensePlate: {
+        type: String,
+        required: true,
+      },
+      registrationNumber: {
+        type: Number,
+        required: true,
+      },
+      registrationState: {
+        type: String,
+        enum: USAStates,
+        required: true,
+      },
+      nameOnRegistration: {
+        type: String,
+        required: true,
+      },
     },
     vinNumber: {
       type: Number,
@@ -70,6 +75,6 @@ const VehicleSchema = new mongoose.Schema(
   },
 );
 
-const Vehicle = mongoose.model<VehicleDocument>("Vehicle", VehicleSchema);
+const Vehicle = mongoose.model<IVehicleDocument>("Vehicle", VehicleSchema);
 
 export default Vehicle;

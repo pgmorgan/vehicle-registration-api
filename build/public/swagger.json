@@ -1,0 +1,373 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"USAStates": {
+				"enum": [
+					"AL",
+					"AK",
+					"AS",
+					"AZ",
+					"AR",
+					"CA",
+					"CO",
+					"CT",
+					"DE",
+					"DC",
+					"FM",
+					"FL",
+					"GA",
+					"GU",
+					"HI",
+					"ID",
+					"IL",
+					"IN",
+					"IA",
+					"KS",
+					"KY",
+					"LA",
+					"ME",
+					"MH",
+					"MD",
+					"MA",
+					"MI",
+					"MN",
+					"MS",
+					"MO",
+					"MT",
+					"NE",
+					"NV",
+					"NH",
+					"NJ",
+					"NM",
+					"NY",
+					"NC",
+					"ND",
+					"MP",
+					"OH",
+					"OK",
+					"OR",
+					"PW",
+					"PA",
+					"PR",
+					"RI",
+					"SC",
+					"SD",
+					"TN",
+					"TX",
+					"UT",
+					"VT",
+					"VI",
+					"VA",
+					"WA",
+					"WV",
+					"WI",
+					"WY"
+				],
+				"type": "string"
+			},
+			"stdColors": {
+				"enum": [
+					"red",
+					"yellow",
+					"green",
+					"blue",
+					"orange",
+					"white",
+					"black",
+					"grey",
+					"silver",
+					"other"
+				],
+				"type": "string"
+			},
+			"IVehicleResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"licensePlate": {
+						"type": "string"
+					},
+					"registrationNumber": {
+						"type": "number",
+						"format": "double"
+					},
+					"registrationState": {
+						"$ref": "#/components/schemas/USAStates"
+					},
+					"nameOnRegistration": {
+						"type": "string"
+					},
+					"vinNumber": {
+						"type": "string"
+					},
+					"ownerReportedCarValue": {
+						"type": "number",
+						"format": "double"
+					},
+					"ownerReportedCurrentMileage": {
+						"type": "number",
+						"format": "double"
+					},
+					"vehicleColor": {
+						"$ref": "#/components/schemas/stdColors"
+					},
+					"otherColor": {
+						"type": "string"
+					},
+					"vehicleDescription": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"licensePlate",
+					"registrationNumber",
+					"registrationState",
+					"nameOnRegistration",
+					"vinNumber",
+					"ownerReportedCarValue",
+					"ownerReportedCurrentMileage",
+					"vehicleColor",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPagedOutput_IVehicleResponse_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/IVehicleResponse"
+						},
+						"type": "array"
+					},
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"perPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalCount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OrderBy": {
+				"enum": [
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "string"
+			},
+			"OrderByDirection": {
+				"enum": [
+					"asc",
+					"desc"
+				],
+				"type": "string"
+			}
+		},
+		"securitySchemes": {
+			"access_token": {
+				"type": "http",
+				"scheme": "bearer"
+			}
+		}
+	},
+	"info": {
+		"title": "vehicle-registration-api",
+		"version": "1.0.0",
+		"license": {
+			"name": "MIT"
+		},
+		"contact": {
+			"name": "Peter Morgan ",
+			"email": "petergm@gmail.com"
+		}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/v1/vehicles": {
+			"get": {
+				"operationId": "GetMany",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPagedOutput_IVehicleResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Vehicle"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "registrationStates",
+						"required": false,
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/USAStates"
+							}
+						}
+					},
+					{
+						"in": "query",
+						"name": "nameOnRegistration",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ownerReportedCarValueGreaterThan",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ownerReportedCarValueLessThan",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ownerReportedMileageGreaterThan",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ownerReportedMileageLessThan",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "vehicleColor",
+						"required": false,
+						"schema": {}
+					},
+					{
+						"in": "query",
+						"name": "createdAfter",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "createdBefore",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "updatedAfter",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "updatedBefore",
+						"required": false,
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "perPage",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/OrderBy"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderByDirection",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/OrderByDirection"
+						}
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
