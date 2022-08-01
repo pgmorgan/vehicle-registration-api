@@ -21,6 +21,7 @@ export default function configureExpress(): {
   /* Returns middleware that only parses urlencoded bodies and
    * only looks at requests where the Content-Type header matches the type option */
   expressApp.use(express.urlencoded({ extended: true }));
+  expressApp.use(express.json());
 
   if (process.env.NODE_ENV === "development") {
     expressApp.use(cors());

@@ -8,7 +8,7 @@ import Vehicle, { IVehicleDocument } from "../models/Vehicle";
 const DEFAULT_PAGE_SIZE = 50;
 
 export default class VehicleService {
-  public async getManyVehicles(
+  public async getMany(
     query: {
       registrationStates?: USAStates[];
       nameOnRegistration?: string;
@@ -86,12 +86,13 @@ export default class VehicleService {
     };
   }
 
-  public async getOneVehicle(query: {
+  public async getOne(query: {
     licensePlate?: string;
     registrationNumber?: string;
     registrationState?: string;
     vinNumber?: number;
-  }): Promise<IVehicleDocument> {
+  }): Promise<IVehicleDocument | void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const findQuery: Record<string, any> = {};
 
     this.addField(findQuery, ["registration.licensePlate"], query.licensePlate);
@@ -106,6 +107,11 @@ export default class VehicleService {
     }
 
     return await Vehicle.findOne(findQuery).lean();
+  }
+
+  public async getById(clientId: string): Promise<IVehicleDocument | void> {
+    const vehicle = await Vehicle.findById(clientId).lean();
+    return vehicle;
   }
 
   /*  This array path syntax allows the following permutations:

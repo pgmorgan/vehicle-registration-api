@@ -19,9 +19,9 @@ async function dbConnectWithRetries(counter: number): Promise<void> {
     winston.info("Successfully connected to MongoDB.");
   } catch (err) {
     if (counter <= 0) {
-      console.error(`Failed to connect to Mongo DB after ${retryAttempts} attempts`);
+      winston.error(`Failed to connect to Mongo DB after ${retryAttempts} attempts`);
     } else {
-      console.error(
+      winston.error(
         `Mongoose connection failed on attempt number ${
           retryAttempts - counter + 1
         }.  Retrying now:`,

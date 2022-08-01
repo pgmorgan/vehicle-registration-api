@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "npm run build && node -r dotenv/config ./dist/index.js ",
-    "dev": "npm run build && nodemon -r dotenv/config src/index.ts",
+    "dev": "nodemon --ext ts,env,yaml,json --watch './src' --ignore './src/App/tsoaRoutes.ts' --exec 'npm run build && node -r dotenv/config dist/index.js'",
     "build": "npm run build:tsoa && tsc",
     "build:tsoa": "mkdir -p dist/public && tsoa spec-and-routes",
     "lint": "eslint src/**/*.ts",

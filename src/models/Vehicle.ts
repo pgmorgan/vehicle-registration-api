@@ -1,12 +1,16 @@
 import mongoose from "mongoose";
 import { stdColors, USAStates } from "../lib";
 
-interface IRegistrationDetails {
+export interface IRegistrationDetails {
   licensePlate: string;
   registrationNumber: number;
   registrationState: USAStates;
   nameOnRegistration: string;
 }
+
+// export interface IVehiclePostBody extends IVehicle {
+//   Omit<IVehicle, 'id' & 'createdAt' & 'updatedAt'>;
+// }
 
 export interface IVehicle {
   id: string;

@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Post, Query, Request, Route, SuccessResponse, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Get,
+  Path,
+  Post,
+  Query,
+  Request,
+  Route,
+  SuccessResponse,
+  Tags,
+} from "tsoa";
 import express from "express";
 import IPagedOutput from "../../lib/interfaces/IPagedOutput";
 import { stdColors, USAStates } from "../../lib";
@@ -8,7 +19,6 @@ import { VehicleTransformer } from "../../transformers/VehicleTransformer";
 import { injectable } from "tsyringe";
 import Vehicle, { IVehicle } from "../../models/Vehicle";
 import Boom from "@hapi/boom";
-import winston from "winston";
 
 /*  @TODO:  I need to add some try-catch blocks in this codebase */
 
@@ -21,6 +31,7 @@ export class VehicleController extends Controller {
   }
 
   @Get()
+  @SuccessResponse(200)
   public async getMany(
     @Request() req: express.Request,
     @Query() registrationStates?: USAStates[],
@@ -39,7 +50,7 @@ export class VehicleController extends Controller {
     @Query() orderBy?: OrderBy,
     @Query() orderByDirection?: OrderByDirection,
   ): Promise<IPagedOutput<IVehicle | void>> {
-    const vehicleResults = await this.vehicleService.getManyVehicles(
+    const vehicleResults = await this.vehicleService.getMany(
       {
         registrationStates,
         nameOnRegistration,
@@ -60,9 +71,14 @@ export class VehicleController extends Controller {
         orderByDirection,
       },
     );
+    if (vehicleResults.totalCount === 0) {
+      this.setStatus(404);
+      return;
+    }
 
     const vehicleTransformer = new VehicleTransformer();
-    const data = vehicleResults.data.map(vehicleTransformer.transformOutgoing);
+    const data = vehicleResults.data
+      .map(vehicleTransformer.transformOutgoing);
 
     return {
       data,
@@ -72,8 +88,8 @@ export class VehicleController extends Controller {
     };
   }
 
-  /* @TODO: I need to verify that this will work given no specific path is provided */
-  @Get("/find-one/")
+  @Get("/find-one")
+  @SuccessResponse(200)
   public async getOne(
     @Request() req: express.Request,
     @Query() licensePlate?: string,
@@ -81,13 +97,33 @@ export class VehicleController extends Controller {
     @Query() registrationState?: string,
     @Query() vinNumber?: number,
   ): Promise<IVehicle | void> {
-    const vehicleResult = await this.vehicleService.getOneVehicle({
+    const vehicleResult = await this.vehicleService.getOne({
       licensePlate,
       registrationNumber,
       registrationState,
       vinNumber,
     });
+    if (!vehicleResult) {
+      this.setStatus(404);
+      return;
+    }
 
+    this.setStatus(200);
+    const vehicleTransformer = new VehicleTransformer();
+    return vehicleTransformer.transformOutgoing(vehicleResult);
+  }
+
+  @Get("/{clientId}")
+  @SuccessResponse(200)
+  public async getById(
+    @Request() req: express.Request,
+    @Path() clientId: string,
+  ): Promise<IVehicle | void> {
+    const vehicleResult = await this.vehicleService.getById(clientId);
+    if (!vehicleResult) {
+      this.setStatus(404);
+      return;
+    }
     const vehicleTransformer = new VehicleTransformer();
     return vehicleTransformer.transformOutgoing(vehicleResult);
   }
@@ -95,26 +131,22 @@ export class VehicleController extends Controller {
   @Post()
   @SuccessResponse(201)
   public async postOne(
-    @Request() req: express.Request,
-    @Body() body: Omit<IVehicle, "id" & "createdAt" & "updatedAt">
+    @Body()  body: Omit<IVehicle, "id" | "createdAt" | "updatedAt">,
   ): Promise<void> {
 
-    winston.info(req);
-    winston.info(body);
     /*  A tricky situation when a previous owner registered a vehicle on the platform.
      *  The easy solution for the new owner would be to allow immediate registration.
      *  With success of the platform in the longrun this could create many duplicate
      *  vehicles in the database.  For the purpose of this assessment I will leave this to
      *  a customer support rep to remedy */
-    const vehicleExists = await this.vehicleService.getOneVehicle({ vinNumber: body.vinNumber });
+    const vehicleExists = await this.vehicleService.getOne({ vinNumber: body.vinNumber });
     if (vehicleExists) {
       throw Boom.conflict(
-        "This vehicle has already been registered.  "
-        + "Please make a PUT, PATCH, or DELETE call to update or remove the existing record",
+        "This vehicle has already been registered.  " +
+          "Please make a PUT, PATCH, or DELETE call to update or remove the existing record",
       );
     }
 
     await new Vehicle(body).save();
-    this.setStatus(201);
   }
 }
