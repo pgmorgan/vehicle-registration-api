@@ -4,7 +4,7 @@
   "entryFile": "./src/index.ts",
   "noImplicitAdditionalProperties": "silently-remove-extras",
   "spec": {
-    "outputDirectory": "./build/public",
+    "outputDirectory": "./dist/public",
     "specVersion": 3,
     "schemes": ["http"],
     "securityDefinitions": {
