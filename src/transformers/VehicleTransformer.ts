@@ -13,10 +13,7 @@ export class VehicleTransformer {
   public transformOutgoing(data: IVehicleDocument): IVehicle {
     return {
       id: data._id,
-      licensePlate: data.licensePlate,
-      registrationNumber: data.registrationNumber,
-      registrationState: data.registrationState,
-      nameOnRegistration: data.nameOnRegistration,
+      registration: data.registration,
       vinNumber: data.vinNumber,
       ownerReportedCarValue: data.ownerReportedCarValue,
       ownerReportedCurrentMileage: data.ownerReportedCurrentMileage,

@@ -1,15 +1,19 @@
 import mongoose from "mongoose";
 import { stdColors, USAStates } from "../lib";
 
-export interface IVehicle {
-  id: string;
+interface IRegistrationDetails {
   licensePlate: string;
   registrationNumber: number;
   registrationState: USAStates;
   nameOnRegistration: string;
-  vinNumber: string;
-  ownerReportedCarValue: number;
-  ownerReportedCurrentMileage: number;
+}
+
+export interface IVehicle {
+  id: string;
+  registration: IRegistrationDetails;
+  vinNumber: number;
+  ownerReportedCarValue: number; // @TODO: Add currency enum field
+  ownerReportedCurrentMileage: number; // @TODO: Add unit of distance enum field (km, miles)
   vehicleColor: stdColors;
   otherColor?: string;
   vehicleDescription?: string;

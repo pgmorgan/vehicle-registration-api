@@ -70,6 +70,31 @@
 				],
 				"type": "string"
 			},
+			"IRegistrationDetails": {
+				"properties": {
+					"licensePlate": {
+						"type": "string"
+					},
+					"registrationNumber": {
+						"type": "number",
+						"format": "double"
+					},
+					"registrationState": {
+						"$ref": "#/components/schemas/USAStates"
+					},
+					"nameOnRegistration": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"licensePlate",
+					"registrationNumber",
+					"registrationState",
+					"nameOnRegistration"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"stdColors": {
 				"enum": [
 					"red",
@@ -85,26 +110,17 @@
 				],
 				"type": "string"
 			},
-			"IVehicleResponse": {
+			"IVehicle": {
 				"properties": {
 					"id": {
 						"type": "string"
 					},
-					"licensePlate": {
-						"type": "string"
-					},
-					"registrationNumber": {
-						"type": "number",
-						"format": "double"
-					},
-					"registrationState": {
-						"$ref": "#/components/schemas/USAStates"
-					},
-					"nameOnRegistration": {
-						"type": "string"
+					"registration": {
+						"$ref": "#/components/schemas/IRegistrationDetails"
 					},
 					"vinNumber": {
-						"type": "string"
+						"type": "number",
+						"format": "double"
 					},
 					"ownerReportedCarValue": {
 						"type": "number",
@@ -134,10 +150,7 @@
 				},
 				"required": [
 					"id",
-					"licensePlate",
-					"registrationNumber",
-					"registrationState",
-					"nameOnRegistration",
+					"registration",
 					"vinNumber",
 					"ownerReportedCarValue",
 					"ownerReportedCurrentMileage",
@@ -148,11 +161,16 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IPagedOutput_IVehicleResponse_": {
+			"IPagedOutput_IVehicle-or-void_": {
 				"properties": {
 					"data": {
 						"items": {
-							"$ref": "#/components/schemas/IVehicleResponse"
+							"anyOf": [
+								{
+									"$ref": "#/components/schemas/IVehicle"
+								},
+								{}
+							]
 						},
 						"type": "array"
 					},
@@ -188,6 +206,61 @@
 					"desc"
 				],
 				"type": "string"
+			},
+			"Pick_IVehicle.Exclude_keyofIVehicle.id-and-createdAt-and-updatedAt__": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"registration": {
+						"$ref": "#/components/schemas/IRegistrationDetails"
+					},
+					"vinNumber": {
+						"type": "number",
+						"format": "double"
+					},
+					"ownerReportedCarValue": {
+						"type": "number",
+						"format": "double"
+					},
+					"ownerReportedCurrentMileage": {
+						"type": "number",
+						"format": "double"
+					},
+					"vehicleColor": {
+						"$ref": "#/components/schemas/stdColors"
+					},
+					"otherColor": {
+						"type": "string"
+					},
+					"vehicleDescription": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"createdAt",
+					"updatedAt",
+					"registration",
+					"vinNumber",
+					"ownerReportedCarValue",
+					"ownerReportedCurrentMileage",
+					"vehicleColor"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"Omit_IVehicle.id-and-createdAt-and-updatedAt_": {
+				"$ref": "#/components/schemas/Pick_IVehicle.Exclude_keyofIVehicle.id-and-createdAt-and-updatedAt__",
+				"description": "Construct a type with the properties of T except for those in type K."
 			}
 		},
 		"securitySchemes": {
@@ -219,7 +292,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/IPagedOutput_IVehicleResponse_"
+									"$ref": "#/components/schemas/IPagedOutput_IVehicle-or-void_"
 								}
 							}
 						}
@@ -359,6 +432,90 @@
 						"required": false,
 						"schema": {
 							"$ref": "#/components/schemas/OrderByDirection"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "PostOne",
+				"responses": {
+					"201": {
+						"description": ""
+					}
+				},
+				"tags": [
+					"Vehicle"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Omit_IVehicle.id-and-createdAt-and-updatedAt_"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/vehicles/find-one": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IVehicle"
+										},
+										{}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Vehicle"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "licensePlate",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "registrationNumber",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "registrationState",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "vinNumber",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
 						}
 					}
 				]

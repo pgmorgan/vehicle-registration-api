@@ -7,27 +7,25 @@ import Vehicle, { IVehicleDocument } from "../models/Vehicle";
 
 const DEFAULT_PAGE_SIZE = 50;
 
-interface IVehicleQuery {
-  registrationStates?: USAStates[];
-  nameOnRegistration?: string;
-  ownerReportedCarValueGreaterThan?: number;
-  ownerReportedCarValueLessThan?: number;
-  ownerReportedMileageGreaterThan?: number;
-  ownerReportedMileageLessThan?: number;
-  vehicleColor?: stdColors | string;
-  createdAfter?: Date;
-  createdBefore?: Date;
-  updatedAfter?: Date;
-  updatedBefore?: Date;
-  page?: number;
-  perPage?: number;
-  orderBy?: OrderBy;
-  orderByDirection?: OrderByDirection;
-}
-
 export default class VehicleService {
-  public async getVehicles(
-    query: IVehicleQuery,
+  public async getManyVehicles(
+    query: {
+      registrationStates?: USAStates[];
+      nameOnRegistration?: string;
+      ownerReportedCarValueGreaterThan?: number;
+      ownerReportedCarValueLessThan?: number;
+      ownerReportedMileageGreaterThan?: number;
+      ownerReportedMileageLessThan?: number;
+      vehicleColor?: stdColors | string;
+      createdAfter?: Date;
+      createdBefore?: Date;
+      updatedAfter?: Date;
+      updatedBefore?: Date;
+      page?: number;
+      perPage?: number;
+      orderBy?: OrderBy;
+      orderByDirection?: OrderByDirection;
+    },
     options?: {
       page?: number;
       perPage?: number;
@@ -69,7 +67,7 @@ export default class VehicleService {
     }
 
     const customSort = {
-      [orderBy]: orderByDirection === OrderByDirection.ASC ? 1 as SortOrder : -1 as SortOrder,
+      [orderBy]: orderByDirection === OrderByDirection.ASC ? (1 as SortOrder) : (-1 as SortOrder),
     };
 
     const vehicles = await Vehicle.find(findQuery)
@@ -86,6 +84,28 @@ export default class VehicleService {
       perPage,
       totalCount,
     };
+  }
+
+  public async getOneVehicle(query: {
+    licensePlate?: string;
+    registrationNumber?: string;
+    registrationState?: string;
+    vinNumber?: number;
+  }): Promise<IVehicleDocument> {
+    const findQuery: Record<string, any> = {};
+
+    this.addField(findQuery, ["registration.licensePlate"], query.licensePlate);
+    this.addField(findQuery, ["vinNumber"], query.vinNumber);
+    if (query.registrationNumber && query.registrationState) {
+      this.addField(findQuery, ["registration.registrationNumber"], query.registrationNumber);
+      this.addField(findQuery, ["registration.registrationState"], query.registrationState);
+    } else if (query.registrationNumber || query.registrationState) {
+      throw new Error(
+        "Incomplete search query.  State of Registration must be accompanied by Registration Number and vice versa.",
+      );
+    }
+
+    return await Vehicle.findOne(findQuery).lean();
   }
 
   /*  This array path syntax allows the following permutations:
