@@ -10,12 +10,7 @@
     "dev": "nodemon --ext ts,env,yaml,json --watch './src' --ignore './src/App/tsoaRoutes.ts' --exec 'npm run build && node -r dotenv/config dist/index.js'",
     "build": "npm run build:tsoa && tsc",
     "build:tsoa": "mkdir -p dist/public && tsoa spec-and-routes",
-    "lint": "eslint src/**/*.ts",
-    "migration:create": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:create",
-    "migration:show": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:show",
-    "migration:generate": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:generate",
-    "migration:run": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:run",
-    "migration:revert": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:revert"
+    "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
     "@hapi/boom": "^10.0.0",
