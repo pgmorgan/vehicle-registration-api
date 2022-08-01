@@ -1,5 +1,7 @@
+import Boom from "@hapi/boom";
 import _ from "lodash";
 import { SortOrder } from "mongoose";
+import { InboundVehicleData } from "../controllers/v1/VehicleController";
 import { stdColors, USAStates } from "../lib";
 import { OrderBy, OrderByDirection } from "../lib/enums/vehicleQueryEnums";
 import IPagedOutput from "../lib/interfaces/IPagedOutput";
@@ -91,7 +93,7 @@ export default class VehicleService {
     registrationNumber?: string;
     registrationState?: string;
     vinNumber?: number;
-  }): Promise<IVehicleDocument | void> {
+  }): Promise<IVehicleDocument | null> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const findQuery: Record<string, any> = {};
 
@@ -109,9 +111,44 @@ export default class VehicleService {
     return await Vehicle.findOne(findQuery).lean();
   }
 
-  public async getById(clientId: string): Promise<IVehicleDocument | void> {
+  public async getById(clientId: string): Promise<IVehicleDocument | null> {
     const vehicle = await Vehicle.findById(clientId).lean();
     return vehicle;
+  }
+
+  /*  The _.merge() function allows us to use the same method for either PUT or PATCH calls.
+   *  The PUT calls will require the entire vehicle body, while the PATCH calls can
+   *  have a subset.  That differentiation happens at the controller level.
+   *  Here the code is identical */
+  public async putOrPatch(
+    id: string,
+    body: InboundVehicleData | Partial<InboundVehicleData>,
+  ): Promise<IVehicleDocument | null> {
+    Vehicle.findByIdAndUpdate(id, body, {
+      new: true,
+      upsert: false,
+    });
+
+    const vehicle = await this.getById(id);
+    if (!vehicle) {
+      throw Boom.notFound("Vehicle not found");
+    }
+
+    /*  tsoa takes care of validating body fields to ensure no extraneous fields are inserted,
+     *  so I can safely use _.merge() here. */
+    const newVehicle = _.merge<IVehicleDocument>(vehicle, body);
+    await newVehicle.save();
+    return newVehicle;
+  }
+
+  public async archive(id: string): Promise<IVehicleDocument | null> {
+    return Vehicle.findByIdAndUpdate(
+      id,
+      { archived: true, archivedAt: new Date() },
+      {
+        upsert: false,
+      },
+    );
   }
 
   /*  This array path syntax allows the following permutations:

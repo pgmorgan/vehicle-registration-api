@@ -23,6 +23,8 @@ export interface IVehicle {
   vehicleDescription?: string;
   createdAt: Date;
   updatedAt: Date;
+  archived?: boolean;
+  archivedAt?: Date;
 }
 
 export interface IVehicleDocument extends Omit<IVehicle, "id">, mongoose.Document {}
@@ -31,6 +33,7 @@ const VehicleSchema = new mongoose.Schema(
   {
     /*  Mongo generates its own `_id` field per document, so I do not need
      *  to manually create one. */
+
     registration: {
       licensePlate: {
         type: String,
@@ -53,6 +56,7 @@ const VehicleSchema = new mongoose.Schema(
     vinNumber: {
       type: Number,
       required: true,
+      unique: true,
     },
     ownerReportedCarValue: {
       type: Number,
@@ -75,6 +79,14 @@ const VehicleSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    archived: {
+      type: Boolean,
+      required: false,
+    },
+    archivedAt: {
+      type: Date,
+      required: false,
+    }
   },
   {
     /*  This option automatically creates a createdAt and updatedAt field
