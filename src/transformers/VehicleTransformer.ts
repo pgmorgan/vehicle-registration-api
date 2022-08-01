@@ -11,7 +11,7 @@ export class VehicleTransformer {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public transformOutgoing(data: IVehicleDocument): IVehicle {
-    return {
+    const vehicle: IVehicle = {
       id: data._id,
       registration: data.registration,
       vinNumber: data.vinNumber,
@@ -23,5 +23,12 @@ export class VehicleTransformer {
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     };
+
+    if (data.archived) {
+      vehicle.archived = data.archived;
+      vehicle.archivedAt = data.archivedAt;
+    }
+
+    return vehicle;
   }
 }

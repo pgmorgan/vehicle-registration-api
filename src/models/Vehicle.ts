@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { stdColors, USAStates } from "../lib";
+import { stdColors, USAStates } from "../lib/enums/vehicleRegistrationEnums";
 
 export interface IRegistrationDetails {
   licensePlate: string;
@@ -8,16 +8,14 @@ export interface IRegistrationDetails {
   nameOnRegistration: string;
 }
 
-// export interface IVehiclePostBody extends IVehicle {
-//   Omit<IVehicle, 'id' & 'createdAt' & 'updatedAt'>;
-// }
-
 export interface IVehicle {
   id: string;
   registration: IRegistrationDetails;
   vinNumber: number;
-  ownerReportedCarValue: number; // @TODO: Add currency enum field
-  ownerReportedCurrentMileage: number; // @TODO: Add unit of distance enum field (km, miles)
+  ownerReportedCarValue: number;
+  /* In a real application we could add a currency enum field */
+  ownerReportedCurrentMileage: number;
+  /* In a real application we could add unit of distance enum field */
   vehicleColor: stdColors;
   otherColor?: string;
   vehicleDescription?: string;
@@ -32,7 +30,8 @@ export interface IVehicleDocument extends Omit<IVehicle, "id">, mongoose.Documen
 const VehicleSchema = new mongoose.Schema(
   {
     /*  Mongo generates its own `_id` field per document, so I do not need
-     *  to manually create one. */
+     *  to manually create one. Furthermore this `_id` field is automatically
+     *  indexed, so I won't add additional indices. */
 
     registration: {
       licensePlate: {

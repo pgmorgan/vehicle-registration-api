@@ -44,7 +44,7 @@ export default async function internalServerError(
       message: "Bad Request",
     };
   } else if (err.name && err.name === "ValidationError") {
-    // mongoose validation error
+    /* mongoose validation error */
     errRes = {
       code: 400,
       message: "Bad Request",

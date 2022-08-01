@@ -2,7 +2,7 @@ import Boom from "@hapi/boom";
 import _ from "lodash";
 import { SortOrder } from "mongoose";
 import { InboundVehicleData } from "../controllers/v1/VehicleController";
-import { stdColors, USAStates } from "../lib";
+import { stdColors, USAStates } from "../lib/enums/vehicleRegistrationEnums";
 import { OrderBy, OrderByDirection } from "../lib/enums/vehicleQueryEnums";
 import IPagedOutput from "../lib/interfaces/IPagedOutput";
 import Vehicle, { IVehicleDocument } from "../models/Vehicle";
@@ -23,10 +23,7 @@ export default class VehicleService {
       createdBefore?: Date;
       updatedAfter?: Date;
       updatedBefore?: Date;
-      page?: number;
-      perPage?: number;
-      orderBy?: OrderBy;
-      orderByDirection?: OrderByDirection;
+      archived?: boolean;
     },
     options?: {
       page?: number;
@@ -67,6 +64,7 @@ export default class VehicleService {
     } else {
       this.addField(findQuery, ["otherColor"], query?.vehicleColor?.trim().toLowerCase());
     }
+    this.addField(findQuery, ["archived"], query.archived);
 
     const customSort = {
       [orderBy]: orderByDirection === OrderByDirection.ASC ? (1 as SortOrder) : (-1 as SortOrder),
@@ -97,16 +95,19 @@ export default class VehicleService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const findQuery: Record<string, any> = {};
 
-    this.addField(findQuery, ["registration.licensePlate"], query.licensePlate);
     this.addField(findQuery, ["vinNumber"], query.vinNumber);
-    if (query.registrationNumber && query.registrationState) {
-      this.addField(findQuery, ["registration.registrationNumber"], query.registrationNumber);
-      this.addField(findQuery, ["registration.registrationState"], query.registrationState);
-    } else if (query.registrationNumber || query.registrationState) {
+    if (
+      (query.registrationNumber || query.licensePlate) &&
+      !(query.registrationState && (query.registrationNumber || query.licensePlate))
+    ) {
       throw new Error(
-        "Incomplete search query.  State of Registration must be accompanied by Registration Number and vice versa.",
+        "Incomplete search query.  State of Registration must be accompanied by Registration Number or License Plate.",
       );
     }
+
+    this.addField(findQuery, ["registration.registrationNumber"], query.registrationNumber);
+    this.addField(findQuery, ["registration.registrationState"], query.registrationState);
+    this.addField(findQuery, ["registration.licensePlate"], query.licensePlate);
 
     return await Vehicle.findOne(findQuery).lean();
   }
@@ -118,33 +119,38 @@ export default class VehicleService {
 
   /*  The _.merge() function allows us to use the same method for either PUT or PATCH calls.
    *  The PUT calls will require the entire vehicle body, while the PATCH calls can
-   *  have a subset.  That differentiation happens at the controller level.
+   *  have a subset.  That differentiation happens at the controller level automatically by tsoa.
+   *  tsoa also takes care of validating body fields to ensure no extraneous fields are inserted.
    *  Here the code is identical */
   public async putOrPatch(
     id: string,
     body: InboundVehicleData | Partial<InboundVehicleData>,
   ): Promise<IVehicleDocument | null> {
-    Vehicle.findByIdAndUpdate(id, body, {
+    const vehicle = Vehicle.findByIdAndUpdate(id, body, {
       new: true,
       upsert: false,
     });
 
-    const vehicle = await this.getById(id);
     if (!vehicle) {
       throw Boom.notFound("Vehicle not found");
     }
-
-    /*  tsoa takes care of validating body fields to ensure no extraneous fields are inserted,
-     *  so I can safely use _.merge() here. */
-    const newVehicle = _.merge<IVehicleDocument>(vehicle, body);
-    await newVehicle.save();
-    return newVehicle;
+    return vehicle;
   }
 
   public async archive(id: string): Promise<IVehicleDocument | null> {
     return Vehicle.findByIdAndUpdate(
       id,
       { archived: true, archivedAt: new Date() },
+      {
+        upsert: false,
+      },
+    );
+  }
+
+  public async unarchive(id: string): Promise<IVehicleDocument | null> {
+    return Vehicle.findByIdAndUpdate(
+      id,
+      { $unset: { archived: 1, archivedAt: 1 }},
       {
         upsert: false,
       },

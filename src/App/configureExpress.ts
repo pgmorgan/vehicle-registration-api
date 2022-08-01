@@ -18,8 +18,6 @@ export default function configureExpress(): {
   const expressApp = express();
   const httpServer = http.createServer(expressApp);
 
-  /* Returns middleware that only parses urlencoded bodies and
-   * only looks at requests where the Content-Type header matches the type option */
   expressApp.use(express.urlencoded({ extended: true }));
   expressApp.use(express.json());
 
@@ -37,17 +35,17 @@ export default function configureExpress(): {
     );
   }
 
-  if (process.env.NODE_ENV !== "production") {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    // const swaggerJson = require("../../build/public/swagger.json");
-    // expressApp.get("/api-docs/openapi.json", (_req, res) => res.send(swaggerJson));
-    // const swaggerOptions = {
-    //   swaggerOptions: {
-    //     url: "/api-docs/openapi.json",
-    //   },
-    // };
-    // expressApp.use("/api-docs", swaggerUI.serve, swaggerUI.setup(undefined, swaggerOptions));
-  }
+  // if (process.env.NODE_ENV !== "production") {
+  //   eslint-disable-next-line @typescript-eslint/no-var-requires
+  //   const swaggerJson = require("../../build/public/swagger.json");
+  //   expressApp.get("/api-docs/openapi.json", (_req, res) => res.send(swaggerJson));
+  //   const swaggerOptions = {
+  //     swaggerOptions: {
+  //       url: "/api-docs/openapi.json",
+  //     },
+  //   };
+  //   expressApp.use("/api-docs", swaggerUI.serve, swaggerUI.setup(undefined, swaggerOptions));
+  // }
 
   tsoaRoutes.RegisterRoutes(expressApp);
 

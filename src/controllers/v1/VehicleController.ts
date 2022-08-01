@@ -12,14 +12,12 @@ import {
   Tags,
 } from "tsoa";
 import IPagedOutput from "../../lib/interfaces/IPagedOutput";
-import { stdColors, USAStates } from "../../lib";
+import { stdColors, USAStates } from "../../lib/enums/vehicleRegistrationEnums";
 import { OrderBy, OrderByDirection } from "../../lib/enums/vehicleQueryEnums";
 import VehicleService from "../../services/vehicleService";
 import { VehicleTransformer } from "../../transformers/VehicleTransformer";
 import { injectable } from "tsyringe";
 import Vehicle, { IVehicle } from "../../models/Vehicle";
-
-/*  @TODO:  I need to add some try-catch blocks in this codebase */
 
 export type InboundVehicleData = Omit<IVehicle, "id" | "createdAt" | "updatedAt">;
 
@@ -112,10 +110,10 @@ export class VehicleController extends Controller {
     return this.vehicleTransformer.transformOutgoing(vehicleResult);
   }
 
-  @Get("/{clientId}")
+  @Get("/{vehicleId}")
   @SuccessResponse(200)
-  public async getById(@Path() clientId: string): Promise<IVehicle | null> {
-    const vehicleResult = await this.vehicleService.getById(clientId);
+  public async getById(@Path() vehicleId: string): Promise<IVehicle | null> {
+    const vehicleResult = await this.vehicleService.getById(vehicleId);
     if (!vehicleResult) {
       this.setStatus(404);
       return;
@@ -142,24 +140,33 @@ export class VehicleController extends Controller {
      *  the client.  For the purpose of this assessment I will only return a status code. */
   }
 
-  @Patch()
+  @Patch("/{vehicleId}")
   @SuccessResponse(200)
-  public async patch(@Path() id: string, @Body() body: Partial<InboundVehicleData>): Promise<Partial<IVehicle | null>> {
-    const vehicleDocument = await this.vehicleService.putOrPatch(id, body)
+  public async patch(@Path() vehicleId: string, @Body() body: Partial<InboundVehicleData>): Promise<Partial<IVehicle | null>> {
+    const vehicleDocument = await this.vehicleService.putOrPatch(vehicleId, body)
     return this.vehicleTransformer.transformOutgoing(vehicleDocument);
   }
 
-  @Put()
+  @Put("/{vehicleId}")
   @SuccessResponse(200)
-  public async put(@Path() id: string, @Body() body: InboundVehicleData): Promise<IVehicle | null> {
-    const vehicleDocument = await this.vehicleService.putOrPatch(id, body)
+  public async put(@Path() vehicleId: string, @Body() body: InboundVehicleData): Promise<IVehicle | null> {
+    const vehicleDocument = await this.vehicleService.putOrPatch(vehicleId, body)
     return this.vehicleTransformer.transformOutgoing(vehicleDocument);
   }
 
-  @Put()
+  @Put("/archive/{vehicleId}")
   @SuccessResponse(200)
-  public async archive(@Path() id: string): Promise<void> {
-    const vehicleDocument = await this.vehicleService.archive(id);
+  public async archive(@Path() vehicleId: string): Promise<void> {
+    const vehicleDocument = await this.vehicleService.archive(vehicleId);
+    if (!vehicleDocument) {
+      this.setStatus(404);
+    }
+  }
+
+  @Put("/unarchive/{vehicleId}")
+  @SuccessResponse(200)
+  public async unarchive(@Path() vehicleId: string): Promise<void> {
+    const vehicleDocument = await this.vehicleService.unarchive(vehicleId);
     if (!vehicleDocument) {
       this.setStatus(404);
     }
