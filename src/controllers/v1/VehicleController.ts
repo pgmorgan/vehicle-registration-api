@@ -15,7 +15,6 @@ import IPagedOutput from "../../lib/interfaces/IPagedOutput";
 import { stdColors, USAStates } from "../../lib/enums/vehicleRegistrationEnums";
 import { OrderBy, OrderByDirection } from "../../lib/enums/vehicleQueryEnums";
 import VehicleService from "../../services/vehicleService";
-import { VehicleTransformer } from "../../transformers/VehicleTransformer";
 import { injectable } from "tsyringe";
 import Vehicle, { IVehicle } from "../../models/Vehicle";
 
@@ -27,7 +26,6 @@ export type InboundVehicleData = Omit<IVehicle, "id" | "createdAt" | "updatedAt"
 export class VehicleController extends Controller {
   constructor(
     private vehicleService: VehicleService,
-    private vehicleTransformer: VehicleTransformer,
   ) {
     super();
   }
@@ -77,10 +75,8 @@ export class VehicleController extends Controller {
       return;
     }
 
-    const data = vehicleResults.data.map(this.vehicleTransformer.transformOutgoing);
-
     return {
-      data,
+      data: vehicleResults.data,
       page: vehicleResults.page,
       perPage: vehicleResults.perPage,
       totalCount: vehicleResults.totalCount,
@@ -107,18 +103,13 @@ export class VehicleController extends Controller {
     }
 
     this.setStatus(200);
-    return this.vehicleTransformer.transformOutgoing(vehicleResult);
+    return vehicleResult;
   }
 
   @Get("/{vehicleId}")
   @SuccessResponse(200)
   public async getById(@Path() vehicleId: string): Promise<IVehicle | null> {
-    const vehicleResult = await this.vehicleService.getById(vehicleId);
-    if (!vehicleResult) {
-      this.setStatus(404);
-      return;
-    }
-    return this.vehicleTransformer.transformOutgoing(vehicleResult);
+    return await this.vehicleService.getById(vehicleId);
   }
 
   @Post()
@@ -143,32 +134,24 @@ export class VehicleController extends Controller {
   @Patch("/{vehicleId}")
   @SuccessResponse(200)
   public async patch(@Path() vehicleId: string, @Body() body: Partial<InboundVehicleData>): Promise<Partial<IVehicle | null>> {
-    const vehicleDocument = await this.vehicleService.putOrPatch(vehicleId, body)
-    return this.vehicleTransformer.transformOutgoing(vehicleDocument);
+    return await this.vehicleService.putOrPatch(vehicleId, body);
   }
 
   @Put("/{vehicleId}")
   @SuccessResponse(200)
   public async put(@Path() vehicleId: string, @Body() body: InboundVehicleData): Promise<IVehicle | null> {
-    const vehicleDocument = await this.vehicleService.putOrPatch(vehicleId, body)
-    return this.vehicleTransformer.transformOutgoing(vehicleDocument);
+    return await this.vehicleService.putOrPatch(vehicleId, body);
   }
 
   @Put("/archive/{vehicleId}")
   @SuccessResponse(200)
   public async archive(@Path() vehicleId: string): Promise<void> {
-    const vehicleDocument = await this.vehicleService.archive(vehicleId);
-    if (!vehicleDocument) {
-      this.setStatus(404);
-    }
+    await this.vehicleService.archive(vehicleId);
   }
 
   @Put("/unarchive/{vehicleId}")
   @SuccessResponse(200)
   public async unarchive(@Path() vehicleId: string): Promise<void> {
-    const vehicleDocument = await this.vehicleService.unarchive(vehicleId);
-    if (!vehicleDocument) {
-      this.setStatus(404);
-    }
+    await this.vehicleService.unarchive(vehicleId);
   }
 }
