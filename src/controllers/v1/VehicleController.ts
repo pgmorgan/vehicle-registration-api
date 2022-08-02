@@ -70,10 +70,6 @@ export class VehicleController extends Controller {
         orderByDirection,
       },
     );
-    if (vehicleResults.totalCount === 0) {
-      this.setStatus(404);
-      return;
-    }
 
     return {
       data: vehicleResults.data,
