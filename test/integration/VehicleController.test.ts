@@ -1,5 +1,5 @@
 import App from "../../src/App";
-import { get, patch, post } from "../lib/httpHelpers";
+import { get, patch, post, put } from "../lib/httpHelpers";
 
 let app: App;
 const path = "/v1/vehicles";
@@ -83,7 +83,7 @@ describe("Vehicle Controller works as expected", () => {
 
       const response2 = await get(path + "/5");
       expect(response2.status).toEqual(200);
-      const jsonData = await response2.json()
+      const jsonData = await response2.json();
       expect(jsonData?.registration?.nameOnRegistration).toEqual("Galvatron");
     });
   });
@@ -94,12 +94,53 @@ describe("Vehicle Controller works as expected", () => {
         vehicleColor: "white",
       };
 
-      const response1 = await get(path + "/1");
-      const jsonData1 = await response1.json()
+      const response1 = await get(path + "/4");
+      const jsonData1 = await response1.json();
       expect(jsonData1?.vehicleColor).toEqual("red");
-      const response2 = await patch(path + "/1", undefined, modifiedField);
+      const response2 = await patch(path + "/4", undefined, modifiedField);
       const jsonData2 = await response2.json();
       expect(jsonData2?.vehicleColor).toEqual("white");
+    });
+  });
+
+  describe("PUT Vehicle Endpoint works as expected", () => {
+    test("PUT an existing vehicle returns a 200 response and we can identify the change", async () => {
+      const modifiedVehicle = {
+        vehicleId: "1",
+        registration: {
+          licensePlate: "345CDE",
+          registrationNumber: 345678,
+          registrationState: "NY",
+          nameOnRegistration: "Optimus Prime",
+        },
+        vinNumber: 876543,
+        ownerReportedCarValue: 1500000,
+        ownerReportedCurrentMileage: 400000,
+        vehicleColor: "other",
+        otherColor: "THIS FIELD HAS BEEN MODIFIED",
+        vehicleDescription: "'Til all are one.",
+      };
+
+      const response1 = await get(path + "/1");
+      const jsonData1 = await response1.json();
+      expect(jsonData1?.vehicleColor).toEqual("red");
+      expect(jsonData1?.otherColor).toBeUndefined();
+      const response2 = await put(path + "/1", undefined, modifiedVehicle);
+      const jsonData2 = await response2.json();
+      expect(jsonData2?.vehicleColor).toEqual("other");
+      expect(jsonData2?.otherColor).toEqual("THIS FIELD HAS BEEN MODIFIED");
+    });
+  });
+
+  describe("ARCHIVE Vehicle Endpoint works as expected", () => {
+    test("ARCHIVE an existing vehicle returns a 200 response and we can identify the change", async () => {
+      const response1 = await get(path + "/3");
+      const jsonData1 = await response1.json();
+      expect(jsonData1?.archived).toBeUndefined();
+      await put(path + "/archive/3");
+      const response2 = await get(path + "/3");
+      const jsonData2 = await response2.json();
+      expect(jsonData2?.archived).toEqual(true);
     });
   });
 });

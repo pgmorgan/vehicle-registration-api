@@ -141,9 +141,9 @@ export default class VehicleService {
   }
 
   public async archive(vehicleId: string): Promise<void> {
-    const vehicle = Vehicle.findOneAndUpdate(
+    const vehicle = await Vehicle.findOneAndUpdate(
       { vehicleId },
-      { archived: true, archivedAt: new Date() },
+      { $set: { archived: true, archivedAt: new Date() } },
       {
         upsert: false,
       },
@@ -154,7 +154,7 @@ export default class VehicleService {
   }
 
   public async unarchive(vehicleId: string): Promise<void> {
-    const vehicle = Vehicle.findOneAndUpdate(
+    const vehicle = await Vehicle.findOneAndUpdate(
       { vehicleId },
       { $unset: { archived: 1, archivedAt: 1 } },
       {

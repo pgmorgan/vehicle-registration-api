@@ -52,6 +52,7 @@ module.exports = [
   },
   {
     _id: ObjectId(),
+    vehicleId: "4",
     registration: {
       licensePlate: "234BCD",
       registrationNumber: 234567,
