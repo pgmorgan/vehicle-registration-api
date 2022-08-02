@@ -112,8 +112,11 @@ export default class VehicleService {
     return await Vehicle.findOne(findQuery).lean();
   }
 
-  public async getById(clientId: string): Promise<IVehicleDocument | null> {
-    const vehicle = await Vehicle.findById(clientId).lean();
+  public async getById(vehicleId: string): Promise<IVehicleDocument | null> {
+    const vehicle = await Vehicle.findOne({ vehicleId }).lean();
+    if (!vehicle) {
+      throw Boom.notFound("Vehicle not found");
+    }
     return vehicle;
   }
 
@@ -123,10 +126,10 @@ export default class VehicleService {
    *  tsoa also takes care of validating body fields to ensure no extraneous fields are inserted.
    *  Here the code is identical */
   public async putOrPatch(
-    id: string,
+    vehicleId: string,
     body: InboundVehicleData | Partial<InboundVehicleData>,
   ): Promise<IVehicleDocument | null> {
-    const vehicle = Vehicle.findByIdAndUpdate(id, body, {
+    const vehicle = Vehicle.findOneAndUpdate({ vehicleId }, body, {
       new: true,
       upsert: false,
     });
@@ -137,24 +140,30 @@ export default class VehicleService {
     return vehicle;
   }
 
-  public async archive(id: string): Promise<IVehicleDocument | null> {
-    return Vehicle.findByIdAndUpdate(
-      id,
+  public async archive(vehicleId: string): Promise<void> {
+    const vehicle = Vehicle.findOneAndUpdate(
+      { vehicleId },
       { archived: true, archivedAt: new Date() },
       {
         upsert: false,
       },
     );
+    if (!vehicle) {
+      throw Boom.notFound("Vehicle not found");
+    }
   }
 
-  public async unarchive(id: string): Promise<IVehicleDocument | null> {
-    return Vehicle.findByIdAndUpdate(
-      id,
-      { $unset: { archived: 1, archivedAt: 1 }},
+  public async unarchive(vehicleId: string): Promise<void> {
+    const vehicle = Vehicle.findOneAndUpdate(
+      { vehicleId },
+      { $unset: { archived: 1, archivedAt: 1 } },
       {
         upsert: false,
       },
     );
+    if (!vehicle) {
+      throw Boom.notFound("Vehicle not found");
+    }
   }
 
   /*  This array path syntax allows the following permutations:

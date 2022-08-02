@@ -9,7 +9,7 @@ export interface IRegistrationDetails {
 }
 
 export interface IVehicle {
-  id: string;
+  vehicleId: string;
   registration: IRegistrationDetails;
   vinNumber: number;
   ownerReportedCarValue: number;
@@ -25,14 +25,16 @@ export interface IVehicle {
   archivedAt?: Date;
 }
 
-export interface IVehicleDocument extends Omit<IVehicle, "id">, mongoose.Document {}
+export interface IVehicleDocument extends IVehicle, mongoose.Document {}
 
 const VehicleSchema = new mongoose.Schema(
   {
-    /*  Mongo generates its own `_id` field per document, so I do not need
-     *  to manually create one. Furthermore this `_id` field is automatically
-     *  indexed, so I won't add additional indices. */
-
+    vehicleId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
     registration: {
       licensePlate: {
         type: String,
