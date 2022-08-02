@@ -1,12 +1,17 @@
 import "reflect-metadata";
 import App from "./App/index";
-import { config as dotenvCraConfig } from "dotenv-cra";
 import loadPackageEnv from "./lib/loadPackageEnv";
 import winston from "winston";
+import dotenv from "dotenv";
 
 async function init(): Promise<void> {
   process.env.NODE_ENV = process.env.NODE_ENV || "development";
-  dotenvCraConfig({ env: process.env.NODE_ENV });
+  if (process.env.NODE_ENV === "test") {
+    dotenv.config({ path: "./.env.test" });
+  } else {
+    dotenv.config();
+  }
+
   loadPackageEnv();
 
   const app = new App();
