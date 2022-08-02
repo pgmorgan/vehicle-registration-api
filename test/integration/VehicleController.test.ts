@@ -1,5 +1,4 @@
 import App from "../../src/App";
-// import { get, post, put, patch } from "../lib/httpHelpers";
 import { get, patch, post } from "../lib/httpHelpers";
 
 let app: App;
@@ -33,14 +32,24 @@ describe("Vehicle Controller works as expected", () => {
   });
 
   describe("GET one by fields Vehicle Endpoint works as expected", () => {
-    test("GET inexistant document fails", async () => {
+    test("GET inexistant document returns 404", async () => {
       const response = await get(path + "/find-one?registrationState=HI");
       expect(response.status).toEqual(404);
     });
 
-    test("GET existant document succeeds", async () => {
+    test("GET existing document succeeds", async () => {
       const response = await get(path + "/find-one?registrationState=CA");
       expect(response.status).toEqual(200);
+    });
+  });
+
+  describe("GET many by fields Vehicle Endpoint works as expected", () => {
+    test("GET existing document succeeds", async () => {
+      const response = await get(path + "?ownerReportedCarValueGreaterThan=100000");
+      const jsonData = await response.json();
+      expect(response.status).toEqual(200);
+      expect(jsonData.data).toHaveLength(2);
+      expect(jsonData.totalCount).toEqual(2);
     });
   });
 
@@ -55,7 +64,7 @@ describe("Vehicle Controller works as expected", () => {
           nameOnRegistration: "Galvatron",
         },
         vinNumber: 111111,
-        ownerReportedCarValue: 1500000,
+        ownerReportedCarValue: 30000,
         ownerReportedCurrentMileage: 400000,
         vehicleColor: "blue",
         vehicleDescription: "",
