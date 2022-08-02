@@ -44,6 +44,14 @@ describe("Vehicle Controller works as expected", () => {
   });
 
   describe("GET many by fields Vehicle Endpoint works as expected", () => {
+    test("Search query that should return no documents, returns no documents", async () => {
+      const response = await get(path + "?vehicleColor=black");
+      const jsonData = await response.json();
+      expect(response.status).toEqual(200);
+      expect(jsonData.data).toHaveLength(0);
+      expect(jsonData.totalCount).toEqual(0);
+    });
+
     test("GET existing document succeeds", async () => {
       const response = await get(path + "?ownerReportedCarValueGreaterThan=100000");
       const jsonData = await response.json();

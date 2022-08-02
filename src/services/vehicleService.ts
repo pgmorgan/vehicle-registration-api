@@ -109,11 +109,7 @@ export default class VehicleService {
     this.addField(findQuery, ["registration.registrationState"], query.registrationState);
     this.addField(findQuery, ["registration.licensePlate"], query.licensePlate);
 
-    const vehicle = await Vehicle.findOne(findQuery).lean();
     return await Vehicle.findOne(findQuery).lean();
-    console.log("*******************");
-    console.log(vehicle);
-    console.log("*******************");
   }
 
   public async getById(vehicleId: string): Promise<IVehicleDocument | null> {
