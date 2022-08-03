@@ -1,127 +1,67 @@
-# carSHAiR Backend Assessment
+# Vehicle Registration API
+
+
 
 ![carSHAiR Logo](https://www.carshair.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FCarSHAiR-Logo.bfa0a90d.png&w=3840&q=75)
 
+
 ## Description
+
+  A Node Typescript project using Mongo and Express.  This project provides a thin node app to execute CRUD operations on a car (vehicle) model.
 
 ### Background
 
-carSHAiR is a peer to peer car sharing platform with a mission to bring high tech solutions to provide an exceptional experience for Guests and Hosts within the car sharing space.
-
-Often times, product requirements are manifested as a series of UI sketches. These sketches provide context as to the user experience our product team envisions for users of the platform.
-
-In order for a car to be "rentable", a car must first be "listed" on the platform. A common user workflow for our Hosts (owners of cars) is to list a new car on the platform. This workflow takes Hosts through a multi-step process in which details about the car are collected, building towards a final listing of their car.
-
-One simplified step in this multi-step process of listing a car is to collect essential details about the Host's car.
-
-### Objectives
-
-As a Backend Developer, you are given a UI sketch from the product team of a single step within the "List a car" workflow. It is your objective to design and build a set of REST API's to support the functionality expressed within the provided UI sketch.
+This project was an assessment for carSHAiR.  The product requirements were provided in the parent repository (the repository this one is forked from), and are summarized in the following UI sketch.  The task was to create a backend for a frontend that might look like this:
 
 [List a car UI sketch](https://xd.adobe.com/view/fed5ede8-2626-46ec-a3f9-ec0cba0df6f4-ab86/)
 
-#### Scope Clarifications:
+Creating a user account model and associated logic was out of the scope for this assessment.
 
-- The scope of your responsibilities are limited to the isolated feature of collecting and storing the information presented on the UI sketch. Although it is implied the car is "owned" by a Host account, design and implementation of accounts is outside the scope of your responsibilities. Assume cars are not owned by users.
-- Frontend design/implementation is not required.
-- Although the requirements can be achieved using a single database table with all the business logic written inside your controller methods, ensure your solution applies "best practices" in your database/api design as well as the project structure. Make sure your solution is "scalable" to a larger project.
+### Database Design Remarks
 
-#### Constraints
+While carSHAiR utilizes a relational database, I have used MongoDB, as this is the database I am more comfortable with to churn out a project quickly.  One of the aspects of a document noSQL database such as Mongo is that records are often highly de-normalized.  It is very common to group related data together under a single model.
 
-- Your REST API must save the collected data to a database
-- Your REST API must support CRUD functionality to **one** resource (e.g. CRUD endpoints for a **car** resource)
-- Along with saving the VIN itself, your API must also decode the VIN and save the decoded vehicle details
-  - Note: only basic vehicle details such as year, make, model are required to be saved.
+If we had user accounts, in my opinion this would certainly warrant a new model, but the extent of normalization is not nearly as extensive as is best practice in RDBMS's (SQL databases).
 
-### Resources
 
-- [List a car UI sketch](https://xd.adobe.com/view/fed5ede8-2626-46ec-a3f9-ec0cba0df6f4-ab86/)
-
-- Setting up a project from scratch is a rare occurrence in most developer's the day-to-day responsibilities. The design of this assessment is not to test your ability on how to setup a project, but rather your ability to contribute to an established project.
-
-  Choice of language, framework, database, etc is flexible but bonus points if you are already comfortable with our current stack:
-  - MySQL
-  - TypeORM
-  - TypeScript
-  - Node.js
-  - Express
-  - routing-controllers
-
-  If you do so choose to implement using our stack, feel free to fork this template repository to help you get started.
-
-- [TypeORM documentation](https://github.com/typeorm/typeorm)
-
-- [routing-controllers documentation](https://github.com/typestack/routing-controllers)
-
-- [Random VIN generator](https://vingenerator.org/)
-
-- [National Highway Traffic Safety Administration (NHTSA) API](https://vpic.nhtsa.dot.gov/api/) for decoding a VIN
-
-### Submission Requirements
-
-- Send us a link to your submission inside a git repository
-  - Show us you are comfortable working with git by keeping a detailed git history
-
-- If forking this repository, delete this README and replace with your own
-
-- Provide a README with your submission summarizing:
-  - Assumptions made
-  - Step by step details on how to bring up the server
-
-- Please omit the company name from your repository/project name
-
-- (Optional) We are always trying to improve the assessment experience for future candidates. When sending your submission, please provide some feedback on the assessment description including details such as:
-
-  - How long the assessment took to complete
-  - Whether or not the requirements were clear
-  - On a scale of 1 - 10, the level of difficulty
-  - If given the choice, would they rather have done an Leet-code style assessment over a project-based assessment
-
-  Feedback on the assessment description will not affect our evaluation of your submission.
-
-## Template Project Setup
-
-### Overview
-
-To reiterate - **there are no restrictions on the choice of tech stack used for your submission.** The main purpose of this assessment is to assess your ability to contribute to an established project.
-
-If you do choose to implement using our stack, feel free to fork this template repository to help you get started. Feel free to add or remove dependencies as necessary.
-
-This template project is composed of the following stack:
-
-- MySQL (through Docker)
-- TypeORM
-- TypeScript
-- Node.js
-- Express
-- routing-controllers
-
-### Prerequisites
-
-- Docker
-  - [General install](https://docs.docker.com/get-docker/)
-  - [homebrew](https://formulae.brew.sh/cask/docker)
-
-- yarn
-  - [General install](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
-  - [homebrew](https://formulae.brew.sh/formula/yarn)
 
 ### Getting Started
 
-To bring up the environment, perform the following steps:
+  This project requires **docker** and **nvm**.
+  **nvm** is Node Version Manager, a light-weight version manager for handling different node and npm versions across projects.  nvm can be installed by following [these instructions](https://github.com/nvm-sh/nvm#installing-and-updating).
 
-1. Bring up the MySQL database
+#### Running Locally
 
-    ```bash
-    # In the project root directory
-    docker compose up
-    # Exposes database on port 3306
-    ```
+```
+# To set the node and npm version
+nvm install v16.16
+nvm use
 
-2. Bring up express server in development mode
+# To launch the database in detached mode
+docker compose up -d
+# Depending on your version of docker, you may need to use the syntax `docker-compose up -d` with a `-` character
 
-    ```bash
-    # In a separate terminal session
-    yarn dev
-    # Exposes express app on port 8889
-    ```
+# To install the node modules
+npm ci
+
+# To run the development server locally
+npm run dev
+
+# To run the test suite
+npm run test
+
+# To take down the database once finished with the project, assuming the root folder is named `vehicle-registration-api`
+docker stop vehicle-registration-api-mongo-1
+docker rm vehicle-registration-api-mongo-1
+```
+
+### Further Steps Given More Time
+
+Given more time I would:
+- Proceed to setup Github Actions or a CircleCI script to run the test suite before allowing merging a PR.
+- Setup a Keycloak docker container with the docker-compose.yml script to mimic a production Keycloak server, and add role based auth[n/z] to the project.
+- Add unit tests
+- Add further integration tests
+- Finish the creation of a Swagger Spec (Open API) served at a local URL to inspect the API usage requirements.
+
+Thank you for your time
