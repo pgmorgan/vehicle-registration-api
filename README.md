@@ -23,7 +23,9 @@ While carSHAiR utilizes a relational database, I have used MongoDB, as this is t
 
 If we had user accounts, in my opinion this would certainly warrant a new model, but the extent of normalization is not nearly as extensive as is best practice in RDBMS's (SQL databases).
 
+### Task Tracking Remarks
 
+I used Github issues to track tasks related to this project and pull requests to merge feature branches to the master branch.
 
 ### Getting Started
 
