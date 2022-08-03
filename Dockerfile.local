@@ -1,8 +1,0 @@
-FROM    node:lts-alpine
-WORKDIR /app
-COPY    package.json ./
-COPY    package-lock.json ./
-RUN     npm ci
-CMD     ./node_modules/.bin/nodemon --ext ts,env,yaml,json \
-        --watch ./src --watch ./tsconfig.json --watch ./package* --watch .env \
-        --exec 'rm -rf ./dist/* && ./node_modules/.bin/tsc -p ./tsconfig.json && node ./dist/index.js || exit 1'
