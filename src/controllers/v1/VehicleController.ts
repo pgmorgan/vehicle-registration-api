@@ -16,17 +16,18 @@ import { stdColors, USAStates } from "../../lib/enums/vehicleRegistrationEnums";
 import { OrderBy, OrderByDirection } from "../../lib/enums/vehicleQueryEnums";
 import VehicleService from "../../services/vehicleService";
 import { injectable } from "tsyringe";
-import Vehicle, { IVehicle } from "../../models/Vehicle";
+import { IVehicle } from "../../models/Vehicle";
 
-export type InboundVehicleData = Omit<IVehicle, "id" | "createdAt" | "updatedAt">;
+export type InboundVehicleData = Omit<
+  IVehicle,
+  "vehicleId" | "createdAt" | "updatedAt" | "vinDetails"
+> & { vinDetails: { vinNumber: string }};
 
 @injectable()
 @Route("/v1/vehicles")
 @Tags("Vehicle")
 export class VehicleController extends Controller {
-  constructor(
-    private vehicleService: VehicleService,
-  ) {
+  constructor(private vehicleService: VehicleService) {
     super();
   }
 
@@ -39,17 +40,21 @@ export class VehicleController extends Controller {
     @Query() ownerReportedCarValueLessThan?: number,
     @Query() ownerReportedMileageGreaterThan?: number,
     @Query() ownerReportedMileageLessThan?: number,
+    @Query() make?: string,
+    @Query() model?: string,
+    @Query() year?: string,
     @Query() vehicleColor?: stdColors | string,
     @Query() createdAfter?: Date,
     @Query() createdBefore?: Date,
     @Query() updatedAfter?: Date,
     @Query() updatedBefore?: Date,
+    @Query() archived?: boolean,
     @Query() page?: number,
     @Query() perPage?: number,
     @Query() orderBy?: OrderBy,
     @Query() orderByDirection?: OrderByDirection,
   ): Promise<IPagedOutput<IVehicle>> {
-    const vehicleResults = await this.vehicleService.getMany(
+    return await this.vehicleService.getMany(
       {
         registrationStates,
         nameOnRegistration,
@@ -57,11 +62,15 @@ export class VehicleController extends Controller {
         ownerReportedCarValueLessThan,
         ownerReportedMileageGreaterThan,
         ownerReportedMileageLessThan,
+        make,
+        model,
+        year,
         vehicleColor,
         createdAfter,
         createdBefore,
         updatedAfter,
         updatedBefore,
+        archived,
       },
       {
         page,
@@ -70,13 +79,6 @@ export class VehicleController extends Controller {
         orderByDirection,
       },
     );
-
-    return {
-      data: vehicleResults.data,
-      page: vehicleResults.page,
-      perPage: vehicleResults.perPage,
-      totalCount: vehicleResults.totalCount,
-    };
   }
 
   @Get("/find-one")
@@ -85,21 +87,14 @@ export class VehicleController extends Controller {
     @Query() licensePlate?: string,
     @Query() registrationNumber?: string,
     @Query() registrationState?: string,
-    @Query() vinNumber?: number,
+    @Query() vinNumber?: string,
   ): Promise<IVehicle | null> {
-    const vehicleResult = await this.vehicleService.getOne({
+    return await this.vehicleService.getOne({
       licensePlate,
       registrationNumber,
       registrationState,
       vinNumber,
     });
-    if (!vehicleResult) {
-      this.setStatus(404);
-      return;
-    }
-
-    this.setStatus(200);
-    return vehicleResult;
   }
 
   @Get("/{vehicleId}")
@@ -113,14 +108,7 @@ export class VehicleController extends Controller {
   public async post(@Body() body: InboundVehicleData): Promise<void> {
     /*  tsoa does body validation for me, ensuring fields are of the correct type,
      *  no required fields are missing, and no extraneous fields are included. */
-
-    /*  When the database save call is issued, the uniqueness constraint on vinNumber
-     *  would throw an error and abort the save if the vinNumber was already registered.
-     *  This is a tricky situation if a previous owner registered a vehicle on the platform.
-     *  The easy solution for the new owner would be to allow immediate registration.
-     *  With success of the platform in the longrun this could create many duplicate
-     *  vehicles in the database.  For the purpose of this assessment I will throw an error */
-    await new Vehicle(body).save();
+    await this.vehicleService.post(body);
 
     /*  It may be considered best practice to return some JSON payload along with the
      *  201 status code, but the content of that payload might depend on the needs of
@@ -129,13 +117,19 @@ export class VehicleController extends Controller {
 
   @Patch("/{vehicleId}")
   @SuccessResponse(200)
-  public async patch(@Path() vehicleId: string, @Body() body: Partial<InboundVehicleData>): Promise<Partial<IVehicle | null>> {
+  public async patch(
+    @Path() vehicleId: string,
+    @Body() body: Partial<InboundVehicleData>,
+  ): Promise<Partial<IVehicle | null>> {
     return await this.vehicleService.putOrPatch(vehicleId, body);
   }
 
   @Put("/{vehicleId}")
   @SuccessResponse(200)
-  public async put(@Path() vehicleId: string, @Body() body: InboundVehicleData): Promise<IVehicle | null> {
+  public async put(
+    @Path() vehicleId: string,
+    @Body() body: InboundVehicleData,
+  ): Promise<IVehicle | null> {
     return await this.vehicleService.putOrPatch(vehicleId, body);
   }
 

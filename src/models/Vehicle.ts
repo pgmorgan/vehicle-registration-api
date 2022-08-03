@@ -8,10 +8,17 @@ export interface IRegistrationDetails {
   nameOnRegistration: string;
 }
 
+export interface IVinDetails {
+  vinNumber: string;
+  make: string;
+  model: string;
+  year: number;
+}
+
 export interface IVehicle {
   vehicleId: string;
   registration: IRegistrationDetails;
-  vinNumber: number;
+  vinDetails: IVinDetails;
   ownerReportedCarValue: number;
   /* In a real application we could add a currency enum field */
   ownerReportedCurrentMileage: number;
@@ -54,10 +61,24 @@ const VehicleSchema = new mongoose.Schema(
         required: true,
       },
     },
-    vinNumber: {
-      type: Number,
-      required: true,
-      unique: true,
+    vinDetails: {
+      vinNumber: {
+        type: String,
+        required: true,
+        unique: true,
+      },
+      make: {
+        type: String,
+        required: false,
+      },
+      model: {
+        type: String,
+        required: false,
+      },
+      year: {
+        type: Number,
+        required: false,
+      },
     },
     ownerReportedCarValue: {
       type: Number,
