@@ -1,13 +1,22 @@
 import Boom from "@hapi/boom";
 import _ from "lodash";
+import fetch from "node-fetch";
 import { SortOrder } from "mongoose";
 import { InboundVehicleData } from "../controllers/v1/VehicleController";
 import { stdColors, USAStates } from "../lib/enums/vehicleRegistrationEnums";
 import { OrderBy, OrderByDirection } from "../lib/enums/vehicleQueryEnums";
 import IPagedOutput from "../lib/interfaces/IPagedOutput";
-import Vehicle, { IVehicleDocument } from "../models/Vehicle";
+import Vehicle, { IVehicleDocument, IVinDetails } from "../models/Vehicle";
+import cuid from "cuid";
 
 const DEFAULT_PAGE_SIZE = 50;
+
+interface INhtsaDotGovResult {
+  Value: string;
+  ValueId: string;
+  Variable: string;
+  VariableId: number;
+}
 
 export default class VehicleService {
   public async getMany(
@@ -18,6 +27,9 @@ export default class VehicleService {
       ownerReportedCarValueLessThan?: number;
       ownerReportedMileageGreaterThan?: number;
       ownerReportedMileageLessThan?: number;
+      make?: string,
+      model?: string,
+      year?: string,
       vehicleColor?: stdColors | string;
       createdAfter?: Date;
       createdBefore?: Date;
@@ -65,6 +77,9 @@ export default class VehicleService {
       this.addField(findQuery, ["otherColor"], query?.vehicleColor?.trim().toLowerCase());
     }
     this.addField(findQuery, ["archived"], query.archived);
+    this.addField(findQuery, ["vinDetails.make"], query.make);
+    this.addField(findQuery, ["vinDetails.model"], query.model);
+    this.addField(findQuery, ["vinDetails.year"], query.year);
 
     const customSort = {
       [orderBy]: orderByDirection === OrderByDirection.ASC ? (1 as SortOrder) : (-1 as SortOrder),
@@ -86,16 +101,46 @@ export default class VehicleService {
     };
   }
 
+  public async post(inboundVehicleData: InboundVehicleData): Promise<void> {
+    const vehicle = {
+      vehicleId: cuid(),
+      ...inboundVehicleData,
+      vinDetails: this.getVinDetails(inboundVehicleData?.vinDetails?.vinNumber)
+    };
+
+    /*  When the database save call is issued, the uniqueness constraint on vinNumber
+     *  would throw an error and abort the save if the vinNumber was already registered.
+     *  This is a tricky situation if a previous owner registered a vehicle on the platform.
+     *  The easy solution for the new owner would be to allow immediate registration.
+     *  With success of the platform in the longrun this could create many duplicate
+     *  vehicles in the database.  For the purpose of this assessment I will throw an error */
+    await new Vehicle(vehicle).save();
+  }
+
+  private async getVinDetails(vinNumber: string): Promise<Partial<IVinDetails>> {
+    const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vinNumber}?format=json`);
+    const make: string | undefined = response?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Make");
+    const model: string | undefined = response?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Model");
+    const year: number | undefined = response?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Model Year");
+
+    const vinDetails: Partial<IVinDetails> = Object.assign({ vinNumber },
+      make ? { make } : null,
+      model ? { model } : null,
+      year ? { year } : null,
+    );
+    return vinDetails;
+  }
+
   public async getOne(query: {
     licensePlate?: string;
     registrationNumber?: string;
     registrationState?: string;
-    vinNumber?: number;
+    vinNumber?: string;
   }): Promise<IVehicleDocument | null> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const findQuery: Record<string, any> = {};
 
-    this.addField(findQuery, ["vinNumber"], query.vinNumber);
+    this.addField(findQuery, ["vinDetails.vinNumber"], query.vinNumber);
     if (
       (query.registrationNumber || query.licensePlate) &&
       !(query.registrationState && (query.registrationNumber || query.licensePlate))
@@ -109,7 +154,11 @@ export default class VehicleService {
     this.addField(findQuery, ["registration.registrationState"], query.registrationState);
     this.addField(findQuery, ["registration.licensePlate"], query.licensePlate);
 
-    return await Vehicle.findOne(findQuery).lean();
+    const vehicle = await Vehicle.findOne(findQuery).lean();
+    if (!vehicle) {
+      throw Boom.notFound("Vehicle not found");
+    }
+    return vehicle;
   }
 
   public async getById(vehicleId: string): Promise<IVehicleDocument | null> {

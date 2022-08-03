@@ -71,7 +71,9 @@ describe("Vehicle Controller works as expected", () => {
           registrationState: "OH",
           nameOnRegistration: "Galvatron",
         },
-        vinNumber: 111111,
+        vinDetails: {
+          vinNumber: "1GKEV16K8LF538649",
+        },
         ownerReportedCarValue: 30000,
         ownerReportedCurrentMileage: 400000,
         vehicleColor: "blue",
@@ -85,6 +87,9 @@ describe("Vehicle Controller works as expected", () => {
       expect(response2.status).toEqual(200);
       const jsonData = await response2.json();
       expect(jsonData?.registration?.nameOnRegistration).toEqual("Galvatron");
+      expect(jsonData?.vinDetails?.make).toEqual("GMC");
+      expect(jsonData?.vinDetails?.model).toEqual("Suburban");
+      expect(jsonData?.vinDetails?.year).toEqual(1990);
     });
   });
 
