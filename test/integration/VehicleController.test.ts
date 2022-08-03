@@ -26,7 +26,7 @@ describe("Vehicle Controller works as expected", () => {
     });
 
     test("GET by Id with valid Id should return 200", async () => {
-      const response = await get(path + "/1");
+      const response = await get(path + "/cl6e3jnxu000009mk0jlkdqqi");
       expect(response.status).toEqual(200);
     });
   });
@@ -64,7 +64,6 @@ describe("Vehicle Controller works as expected", () => {
   describe("POST Vehicle Endpoint works as expected", () => {
     test("POST a new valid document allows us to subsequently fetch it", async () => {
       const newVehicle = {
-        vehicleId: "5",
         registration: {
           licensePlate: "678FGH",
           registrationNumber: 111111,
@@ -83,7 +82,7 @@ describe("Vehicle Controller works as expected", () => {
       const response = await post(path, newVehicle);
       expect(response.status).toEqual(201);
 
-      const response2 = await get(path + "/5");
+      const response2 = await get(path + "/find-one?registrationState=OH&licensePlate=678FGH");
       expect(response2.status).toEqual(200);
       const jsonData = await response2.json();
       expect(jsonData?.registration?.nameOnRegistration).toEqual("Galvatron");
@@ -99,10 +98,10 @@ describe("Vehicle Controller works as expected", () => {
         vehicleColor: "white",
       };
 
-      const response1 = await get(path + "/4");
+      const response1 = await get(path + "/cl6e3l8us000309mk4n091675");
       const jsonData1 = await response1.json();
       expect(jsonData1?.vehicleColor).toEqual("red");
-      const response2 = await patch(path + "/4", undefined, modifiedField);
+      const response2 = await patch(path + "/cl6e3l8us000309mk4n091675", undefined, modifiedField);
       const jsonData2 = await response2.json();
       expect(jsonData2?.vehicleColor).toEqual("white");
     });
@@ -111,14 +110,19 @@ describe("Vehicle Controller works as expected", () => {
   describe("PUT Vehicle Endpoint works as expected", () => {
     test("PUT an existing vehicle returns a 200 response and we can identify the change", async () => {
       const modifiedVehicle = {
-        vehicleId: "1",
+        vehicleId: "cl6e3jnxu000009mk0jlkdqqi",
         registration: {
           licensePlate: "345CDE",
           registrationNumber: 345678,
           registrationState: "NY",
           nameOnRegistration: "Optimus Prime",
         },
-        vinNumber: 876543,
+        vinDetails: {
+          vinNumber: "JH4DB1650MS013392",
+          make: "ACURA",
+          model: "Integra",
+          year: 1991,
+        },
         ownerReportedCarValue: 1500000,
         ownerReportedCurrentMileage: 400000,
         vehicleColor: "other",
@@ -126,11 +130,11 @@ describe("Vehicle Controller works as expected", () => {
         vehicleDescription: "'Til all are one.",
       };
 
-      const response1 = await get(path + "/1");
+      const response1 = await get(path + "/cl6e3jnxu000009mk0jlkdqqi");
       const jsonData1 = await response1.json();
       expect(jsonData1?.vehicleColor).toEqual("red");
       expect(jsonData1?.otherColor).toBeUndefined();
-      const response2 = await put(path + "/1", undefined, modifiedVehicle);
+      const response2 = await put(path + "/cl6e3jnxu000009mk0jlkdqqi", undefined, modifiedVehicle);
       const jsonData2 = await response2.json();
       expect(jsonData2?.vehicleColor).toEqual("other");
       expect(jsonData2?.otherColor).toEqual("THIS FIELD HAS BEEN MODIFIED");
@@ -139,11 +143,11 @@ describe("Vehicle Controller works as expected", () => {
 
   describe("ARCHIVE Vehicle Endpoint works as expected", () => {
     test("ARCHIVE an existing vehicle returns a 200 response and we can identify the change", async () => {
-      const response1 = await get(path + "/3");
+      const response1 = await get(path + "/cl6e3kyye000209mk7alh40fu");
       const jsonData1 = await response1.json();
       expect(jsonData1?.archived).toBeUndefined();
-      await put(path + "/archive/3");
-      const response2 = await get(path + "/3");
+      await put(path + "/archive/cl6e3kyye000209mk7alh40fu");
+      const response2 = await get(path + "/cl6e3kyye000209mk7alh40fu");
       const jsonData2 = await response2.json();
       expect(jsonData2?.archived).toEqual(true);
     });

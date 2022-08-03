@@ -7,7 +7,7 @@ const { ObjectID: ObjectId } = require("mongodb");
 module.exports = [
   {
     _id: ObjectId(),
-    vehicleId: "1",
+    vehicleId: "cl6e3jnxu000009mk0jlkdqqi",
     registration: {
       licensePlate: "345CDE",
       registrationNumber: 345678,
@@ -27,7 +27,7 @@ module.exports = [
   },
   {
     _id: ObjectId(),
-    vehicleId: "2",
+    vehicleId: "cl6e3kit1000109mk71mwfv85",
     registration: {
       licensePlate: "456DEF",
       registrationNumber: 987654,
@@ -47,7 +47,7 @@ module.exports = [
   },
   {
     _id: ObjectId(),
-    vehicleId: "3",
+    vehicleId: "cl6e3kyye000209mk7alh40fu",
     registration: {
       licensePlate: "123ABC",
       registrationNumber: 654321,
@@ -67,7 +67,7 @@ module.exports = [
   },
   {
     _id: ObjectId(),
-    vehicleId: "4",
+    vehicleId: "cl6e3l8us000309mk4n091675",
     registration: {
       licensePlate: "234BCD",
       registrationNumber: 765432,

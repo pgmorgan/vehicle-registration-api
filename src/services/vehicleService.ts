@@ -174,6 +174,9 @@ export default class VehicleService {
     this.addField(findQuery, ["registration.registrationState"], query.registrationState);
     this.addField(findQuery, ["registration.licensePlate"], query.licensePlate);
 
+    console.log("*****************");
+    console.log(JSON.stringify(findQuery, undefined, 2));
+    console.log("*****************");
     const vehicle = await Vehicle.findOne(findQuery).lean();
     if (!vehicle) {
       throw Boom.notFound("Vehicle not found");
