@@ -48,6 +48,7 @@ export class VehicleController extends Controller {
     @Query() createdBefore?: Date,
     @Query() updatedAfter?: Date,
     @Query() updatedBefore?: Date,
+    @Query() archived?: boolean,
     @Query() page?: number,
     @Query() perPage?: number,
     @Query() orderBy?: OrderBy,
@@ -69,6 +70,7 @@ export class VehicleController extends Controller {
         createdBefore,
         updatedAfter,
         updatedBefore,
+        archived,
       },
       {
         page,

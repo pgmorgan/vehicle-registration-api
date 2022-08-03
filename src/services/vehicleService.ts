@@ -76,10 +76,14 @@ export default class VehicleService {
     } else {
       this.addField(findQuery, ["otherColor"], query?.vehicleColor?.trim().toLowerCase());
     }
-    this.addField(findQuery, ["archived"], query.archived);
     this.addField(findQuery, ["vinDetails.make"], query.make);
     this.addField(findQuery, ["vinDetails.model"], query.model);
     this.addField(findQuery, ["vinDetails.year"], query.year);
+    if (query.archived) {
+      this.addField(findQuery, ["archived"], query.archived);
+    } else {
+      this.addField(findQuery, ["archived", "$exists"], false);
+    }
 
     const customSort = {
       [orderBy]: orderByDirection === OrderByDirection.ASC ? (1 as SortOrder) : (-1 as SortOrder),
@@ -223,6 +227,6 @@ export default class VehicleService {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private addField(object: Record<string, any>, path: string[], value: any) {
-    value && _.set(object, path, value);
+    value !== undefined && _.set(object, path, value);
   }
 }
