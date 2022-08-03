@@ -109,8 +109,9 @@ export default class VehicleService {
     const vehicle = {
       vehicleId: cuid(),
       ...inboundVehicleData,
-      vinDetails: this.getVinDetails(inboundVehicleData?.vinDetails?.vinNumber)
+      vinDetails: await this.getVinDetails(inboundVehicleData?.vinDetails?.vinNumber),
     };
+    console.log(JSON.stringify(vehicle, undefined, 2));
 
     /*  When the database save call is issued, the uniqueness constraint on vinNumber
      *  would throw an error and abort the save if the vinNumber was already registered.
@@ -118,20 +119,35 @@ export default class VehicleService {
      *  The easy solution for the new owner would be to allow immediate registration.
      *  With success of the platform in the longrun this could create many duplicate
      *  vehicles in the database.  For the purpose of this assessment I will throw an error */
-    await new Vehicle(vehicle).save();
+    try {
+      await new Vehicle(vehicle).save();
+    } catch (err: unknown) {
+      console.log("111111");
+      if (err instanceof Error) {
+        console.log("222222");
+        if (err.message.includes("E11000")) {  /* E11000 === Mongo Error code for duplicate key */
+          console.log("333333");
+          throw Boom.badRequest("Vin number appears to be already registered.  Please update or archive existing record.");
+        } else {
+          throw err;
+        }
+      }
+    }
   }
 
   private async getVinDetails(vinNumber: string): Promise<Partial<IVinDetails>> {
     const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vinNumber}?format=json`);
-    const make: string | undefined = response?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Make");
-    const model: string | undefined = response?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Model");
-    const year: number | undefined = response?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Model Year");
+    const jsonResponse = await response.json();
+    const make: string | undefined = jsonResponse?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Make")?.Value;
+    const model: string | undefined = jsonResponse?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Model")?.Value;
+    const year: number | undefined = jsonResponse?.Results?.find((obj: INhtsaDotGovResult) => obj.Variable === "Model Year")?.Value;
 
     const vinDetails: Partial<IVinDetails> = Object.assign({ vinNumber },
       make ? { make } : null,
       model ? { model } : null,
       year ? { year } : null,
     );
+    console.log(JSON.stringify(vinDetails, undefined, 2));
     return vinDetails;
   }
 
