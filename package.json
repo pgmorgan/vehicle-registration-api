@@ -12,7 +12,7 @@
     "build:tsoa": "mkdir -p dist/public && tsoa spec-and-routes",
     "lint": "eslint src/**/*.ts",
     "fixture": "mongodb-fixtures rebuild --path ./fixture --url mongodb://$(grep MONGO_HOST .env | cut -d '=' -f2):$(grep MONGO_PORT .env | cut -d '=' -f2)/test",
-    "test": "npm run fixture && npm run test:unit && npm run test:integration",
+    "test": "npm run build:tsoa && npm run fixture && npm run test:unit && npm run test:integration",
     "test:unit": "#short_of_time_unable_to_complete_unit_tests",
     "test:integration": "NODE_ENV=test jest --no-cache --coverage --maxWorkers=1 --config=jest.integration.config.js --verbose"
   },
